@@ -6,25 +6,41 @@ export default class NewBill {
     this.document = document
     this.onNavigate = onNavigate
     this.store = store
+    // Get the form of newBill
     const formNewBill = this.document.querySelector(`form[data-testid="form-new-bill"]`)
+    // Listener on the newBill submit button
     formNewBill.addEventListener("submit", this.handleSubmit)
+    // Get the input files
     const file = this.document.querySelector(`input[data-testid="file"]`)
+    // Listener on the input file
     file.addEventListener("change", this.handleChangeFile)
     this.fileUrl = null
     this.fileName = null
     this.billId = null
     new Logout({ document, localStorage, onNavigate })
   }
+
+  /**
+   * Callback function for listener on input files
+   * @param {Event} e 
+   */
   handleChangeFile = e => {
     e.preventDefault()
+
+    // Get the object with the file which is just load in the input (.files[0])
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
+    // Split the path (C:\ggggg\hhhhh.jpg) with split(\)
     const filePath = e.target.value.split(/\\/g)
+    // Retrieve the last item of filePath[] which contains the file name
     const fileName = filePath[filePath.length-1]
+    
+    // Create an object FormData with datas of user stored in localStorage
     const formData = new FormData()
     const email = JSON.parse(localStorage.getItem("user")).email
     formData.append('file', file)
     formData.append('email', email)
-
+   
+    // Calss api for create a bill for the good user - formData is send with the request
     this.store
       .bills()
       .create({
@@ -40,8 +56,15 @@ export default class NewBill {
         this.fileName = fileName
       }).catch(error => console.error(error))
   }
+
+  /**
+   * Callbach for listener submit newBill form
+   * @param {Event} e 
+   */
   handleSubmit = e => {
     e.preventDefault()
+
+    
     console.log('e.target.querySelector(`input[data-testid="datepicker"]`).value', e.target.querySelector(`input[data-testid="datepicker"]`).value)
     const email = JSON.parse(localStorage.getItem("user")).email
     const bill = {

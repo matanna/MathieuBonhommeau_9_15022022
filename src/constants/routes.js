@@ -3,6 +3,7 @@ import BillsUI from "../views/BillsUI.js"
 import NewBillUI from "../views/NewBillUI.js"
 import DashboardUI from "../views/DashboardUI.js"
 
+// Define pathname avaible in the app with their associted method
 export const ROUTES_PATH = {
   Login: '/',
   Bills: '#employee/bills',
@@ -10,6 +11,7 @@ export const ROUTES_PATH = {
   Dashboard: '#admin/dashboard'
 }
 
+// Define the view to use in term of pathname
 export const ROUTES = ({ pathname, data, error, loading }) => {
   switch (pathname) {
     case ROUTES_PATH['Login']:
