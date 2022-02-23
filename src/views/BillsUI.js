@@ -1,15 +1,17 @@
 import VerticalLayout from './VerticalLayout.js'
 import ErrorPage from "./ErrorPage.js"
 import LoadingPage from "./LoadingPage.js"
+import { formatDate, formatStatus } from "../app/format.js"
 
 import Actions from './Actions.js'
 
 const row = (bill) => {
+  bill
   return (`
     <tr>
       <td>${bill.type}</td>
       <td>${bill.name}</td>
-      <td>${bill.date}</td>
+      <td data-testid="date">${bill.date}</td>
       <td>${bill.amount} €</td>
       <td>${bill.status}</td>
       <td>
@@ -20,7 +22,36 @@ const row = (bill) => {
   }
 
 const rows = (data) => {
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+  if (data && data.length) {
+    
+    const bills = data
+      // Sort bills by date before format
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      // For each bill, the date format and the status format are change
+      .map(doc => {
+        try {
+          return {
+            ...doc,
+            date: formatDate(doc.date),
+            status: formatStatus(doc.status)
+          }
+        // If an error with change formats
+        } catch(e) {
+          // if for some reason, corrupted data was introduced, we manage here failing formatDate function
+          // log the error and return unformatted date in that case
+          console.log(e,'for',doc)
+          return {
+            ...doc,
+            date: doc.date,
+            status: formatStatus(doc.status)
+          }
+        }
+      })
+    return bills.map(bill => row(bill)).join("")
+
+  } else {
+    return ""
+  }
 }
 
 export default ({ data: bills, loading, error }) => {
