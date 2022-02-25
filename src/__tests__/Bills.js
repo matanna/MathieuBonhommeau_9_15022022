@@ -28,7 +28,9 @@ describe("Given I am connected as an employee", () => {
       expect(lineOfBills.length).toEqual(4)
     })
 
-    
+    it("Then bills dispayed on the page are those of connected user", () => {
+      
+    })
 
     it("Then bills should be ordered from earliest to latest", () => {
       // Get all date elements for check if their are in the good order
@@ -60,12 +62,17 @@ describe("Given I am connected as an employee", () => {
       it("Then the bill date is displayed not formatted and a error message is dispatched", () => {
         document.body.innerHTML = ''
         document.body.innerHTML = BillsUI({data: billsDateCorrupt})
-        jest.fn(console, 'log').mockImplementation(() => {})
         
         const date = screen.getAllByTestId("date").map(a => a.innerHTML)[0]
         expect(date).toEqual('204-04')
         const date2 = screen.getAllByTestId("date").map(a => a.innerHTML)[1]
         expect(date2).toEqual('null')
+      })
+
+      it("Then an error message is send in console", () => {
+        jest.spyOn(global.console, 'log')
+        BillsUI({data: billsDateCorrupt})
+        expect(console.log).toHaveBeenCalledTimes(2)
       })
     })
 

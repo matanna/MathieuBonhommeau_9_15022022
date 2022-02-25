@@ -7,7 +7,6 @@ export default class {
     this.onNavigate = onNavigate
     this.store = store
     // Get the newBill button
-    console.log(document)
     const buttonNewBill = document.querySelector(`button[data-testid="btn-new-bill"]`)
     // Listener for newBill button
     if (buttonNewBill) buttonNewBill.addEventListener('click', this.handleClickNewBill)
@@ -41,7 +40,7 @@ export default class {
     // If store exist (= if the backend is run / if the connection with api is ok)
     if (this.store) {
       return this.store
-      // Call login methods (api calls)!mpoikj u
+      // Call login methods (api calls)
       .bills()
       .list()
       .then(bills => bills)

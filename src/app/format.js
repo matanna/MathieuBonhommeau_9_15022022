@@ -1,4 +1,6 @@
 export const formatDate = (dateStr) => {
+  const regex = /^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i
+  if (dateStr === null || dateStr.match(regex) === null) throw "Format invalide"
   const date = new Date(dateStr)
   const ye = new Intl.DateTimeFormat('fr', { year: 'numeric' }).format(date)
   const mo = new Intl.DateTimeFormat('fr', { month: 'short' }).format(date)
