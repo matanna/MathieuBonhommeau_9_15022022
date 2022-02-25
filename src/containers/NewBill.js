@@ -29,6 +29,11 @@ export default class NewBill {
 
     // Get the object with the file which is just load in the input (.files[0])
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
+    const extensionsAut = ["image/png", "image/jpeg"]
+    if (!extensionsAut.includes(file.type)) {
+      this.document.querySelector(`input[data-testid="file"]`).value = ''
+    }
+    console.log(file)
     // Split the path (C:\ggggg\hhhhh.jpg) with split(\)
     const filePath = e.target.value.split(/\\/g)
     // Retrieve the last item of filePath[] which contains the file name
@@ -50,7 +55,6 @@ export default class NewBill {
         }
       })
       .then(({fileUrl, key}) => {
-        console.log(fileUrl)
         this.billId = key
         this.fileUrl = fileUrl
         this.fileName = fileName

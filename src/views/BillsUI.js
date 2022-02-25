@@ -21,14 +21,18 @@ const row = (bill) => {
     `)
   }
 
-const rows = (data) => {
+export const rows = (data) => {
   if (data && data.length) {
-    
-    const bills = data
+    const regex = /^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i
+    const dataDateNotCorrupt = [...data].filter(e => e.date !== null && e.date.match(regex))
+    console.log(dataDateNotCorrupt)
+    const bills = dataDateNotCorrupt
       // Sort bills by date before format
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       // For each bill, the date format and the status format are change
+      .concat([...data].filter(e => e.date === null || e.date.match(regex) === null))
       .map(doc => {
+        console.log('pass')
         try {
           return {
             ...doc,
@@ -57,7 +61,7 @@ const rows = (data) => {
 export default ({ data: bills, loading, error }) => {
   
   const modal = () => (`
-    <div class="modal fade" id="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="modaleFile" data-testid="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
