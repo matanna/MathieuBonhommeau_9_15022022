@@ -1,17 +1,19 @@
 import VerticalLayout from './VerticalLayout.js'
 import ErrorPage from "./ErrorPage.js"
 import LoadingPage from "./LoadingPage.js"
+import { formatDate, formatStatus } from "../app/format.js"
 
 import Actions from './Actions.js'
 
 const row = (bill) => {
+  bill
   return (`
     <tr>
       <td>${bill.type}</td>
       <td>${bill.name}</td>
-      <td>${bill.date}</td>
+      <td data-testid="date">${bill.date}</td>
       <td>${bill.amount} €</td>
-      <td>${bill.status}</td>
+      <td data-testid="status">${bill.status}</td>
       <td>
         ${Actions(bill.fileUrl)}
       </td>
@@ -20,13 +22,45 @@ const row = (bill) => {
   }
 
 const rows = (data) => {
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+  if (data && data.length) {
+    const regex = /^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i
+    const dataDateNotCorrupt = [...data].filter(e => e.date !== null && e.date.match(regex))
+    
+    const bills = dataDateNotCorrupt
+      // Sort bills by date before format
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      // For each bill, the date format and the status format are change
+      .concat([...data].filter(e => e.date === null || e.date.match(regex) === null))
+      .map(doc => {
+        try {
+          return {
+            ...doc,
+            date: formatDate(doc.date),
+            status: formatStatus(doc.status)
+          }
+        // If an error with change formats
+        } catch(e) {
+          // if for some reason, corrupted data was introduced, we manage here failing formatDate function
+          // log the error and return unformatted date in that case
+          console.log(e,'for',doc)
+          return {
+            ...doc,
+            date: doc.date,
+            status: formatStatus(doc.status)
+          }
+        }
+      })
+    return bills.map(bill => row(bill)).join("")
+
+  } else {
+    return ""
+  }
 }
 
 export default ({ data: bills, loading, error }) => {
   
   const modal = () => (`
-    <div class="modal fade" id="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal fade" id="modaleFile" data-testid="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">

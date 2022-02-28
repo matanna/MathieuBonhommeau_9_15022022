@@ -13,7 +13,7 @@ import mockStore from "../__mocks__/store"
 import { bills } from "../fixtures/bills"
 import router from "../app/Router"
 
-jest.mock("../app/store", () => mockStore)
+jest.mock("../app/Store", () => mockStore)
 
 describe('Given I am connected as an Admin', () => {
   describe('When I am on Dashboard page, there are bills, and there is one pending', () => {
@@ -228,14 +228,20 @@ describe('Given I am connected as Admin and I am on Dashboard page and I clicked
         document, onNavigate, store, bills, localStorage: window.localStorage
       })
 
+      // Mock the bootstrap function modal
+      $.fn.modal = jest.fn();
+
       const handleClickIconEye = jest.fn(dashboard.handleClickIconEye)
       const eye = screen.getByTestId('icon-eye-d')
       eye.addEventListener('click', handleClickIconEye)
       userEvent.click(eye)
       expect(handleClickIconEye).toHaveBeenCalled()
 
-      const modale = screen.getByTestId('modaleFileAdmin')
-      expect(modale).toBeTruthy()
+      //const modale = screen.getByTestId('modaleFileAdmin')
+      //expect(modale).toBeTruthy()
+
+      const modalBodyImg = screen.getByAltText('Bill')
+      expect(modalBodyImg).toBeTruthy()
     })
   })
 })
@@ -250,6 +256,7 @@ describe("Given I am a user connected as Admin", () => {
       document.body.append(root)
       router()
       window.onNavigate(ROUTES_PATH.Dashboard)
+      screen.debug(document, 3000000)
       await waitFor(() => screen.getByText("Validations"))
       const contentPending  = await screen.getByText("En attente (1)")
       expect(contentPending).toBeTruthy()

@@ -52,6 +52,7 @@ export default () => {
 
       // Instantiate a bill object for manage bills operations
       const bills = new Bills({ document, onNavigate, store, localStorage  })
+      
       // Retrieve bills from the API
       bills.getBills().then(data => {
         // Inject bills in the page
@@ -148,7 +149,7 @@ export default () => {
 
       // Create bills with the bill object
       const bills = new Bills({ document, onNavigate, store, localStorage  })
-
+      
       // Retrieve bills from API
       bills.getBills().then(data => {
         // Inject bills in document 
