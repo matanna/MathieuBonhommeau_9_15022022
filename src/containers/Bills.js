@@ -28,7 +28,6 @@ export default class {
   // Callback function for listener eye-icon button - display the bill image when click
   handleClickIconEye = async (icon) => {
     // Get the url of the image which is store on the server / api
-    console.log($('#modaleFile')[0])
     const billUrl = icon.getAttribute("data-bill-url")
     const imgWidth = Math.floor($('#modaleFile').width() * 0.5)
     $('#modaleFile').find(".modal-body").html(`<div style='text-align: center;' class="bill-proof-container"><img width=${imgWidth} src=${billUrl} alt="Bill" /></div>`)

@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import {fireEvent, screen, waitFor} from "@testing-library/dom"
+import {fireEvent, getByTestId, getByText, screen, waitFor} from "@testing-library/dom"
 import '@testing-library/jest-dom/extend-expect'
 import userEvent from '@testing-library/user-event'
 import BillsUI, {rows} from "../views/BillsUI.js"
@@ -10,26 +10,56 @@ import { ROUTES, ROUTES_PATH} from "../constants/routes.js";
 import {localStorageMock} from "../__mocks__/localStorage.js";
 import router from "../app/Router.js";
 import Bills from "../containers/Bills.js"
+import { formatStatus } from '../app/format.js'
+import mockStore from '../__mocks__/store.js'
+
+
 
 describe("Given I am connected as an employee", () => {
 
-  let billsObject
-
   afterEach(() => {
     document.body.innerHTML = ''
-    billsObject = ''
   })
 
   describe("When I am on Bills Page", () => {
     
+    test("Then bill icon in vertical layout should be highlighted", async () => {
+      Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+      window.localStorage.setItem('user', JSON.stringify({
+        type: 'Employee'
+      }))
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.append(root)
+      router()
+      window.onNavigate(ROUTES_PATH.Bills)
+      const windowIcon = screen.getByTestId('icon-window')
+      expect(windowIcon).toHaveClass('active-icon')
+    })
+
     it('Then the number of bills diplayed on the page is 4', () => {
       document.body.innerHTML = BillsUI({data: bills})
       const lineOfBills = screen.getByTestId('tbody').querySelectorAll('tr')
       expect(lineOfBills.length).toEqual(4)
     })
 
-    it("Then bills dispayed on the page are those of connected user", () => {
-      
+    it("Then the page is empty if no bills are stored", () => {
+      document.body.innerHTML = BillsUI({})
+      const lineOfBills = screen.getByTestId('tbody').querySelectorAll('tr')
+      expect(lineOfBills.length).toEqual(0)
+    })
+
+    it("Then the status is displayed in the good format", () => {
+      document.body.innerHTML = BillsUI({data: bills})
+      const status = screen.getAllByTestId('status')
+      expect(status[0].innerHTML).toEqual('En attente')
+      expect(status[1].innerHTML).toEqual('Accepté')
+      expect(status[2].innerHTML).toEqual('Refusé')
+
+      expect(formatStatus("pending")).toEqual("En attente")
+      expect(formatStatus("refused")).toEqual("Refusé")
+      expect(formatStatus("accepted")).toEqual("Accepté")
+
     })
 
     it("Then bills should be ordered from earliest to latest", () => {
@@ -42,24 +72,28 @@ describe("Given I am connected as an employee", () => {
       expect(dates.slice(0, datesSorted.length)).toEqual(datesSorted)
     })
 
-    it('Then, Loading page should be rendered', () => {
-      document.body.innerHTML = BillsUI({ loading: true })
-      expect(screen.getAllByText('Loading...')).toBeTruthy()
-    })
-
-    it('Then, Error page should be rendered', () => {
-      document.body.innerHTML = BillsUI({ error: true })
-      expect(screen.getByTestId('error-message')).toBeTruthy()
-    })
-
     it("Then the bill date is displayed in the good format", () => {
       document.body.innerHTML = BillsUI({data: bills})
       const date = screen.getAllByTestId("date").map(a => a.innerHTML)[0]
       expect(date).toEqual('4 Avr. 04')
     })
 
+    describe('But the page is in Loading', () => {
+      it('Then, Loading page should be rendered', () => {
+        document.body.innerHTML = BillsUI({ loading: true })
+        expect(screen.getAllByText('Loading...')).toBeTruthy()
+      })
+    })
+
+    describe('But the occured an error', () => {
+      it('Then, Error page should be rendered', () => {
+        document.body.innerHTML = BillsUI({ error: true })
+        expect(screen.getByTestId('error-message')).toBeTruthy()
+      })
+    })
+
     describe('When a bill date is corrupted', () => {
-      it("Then the bill date is displayed not formatted and a error message is dispatched", () => {
+      it("Then the bill date is displayed not formatted", () => {
         document.body.innerHTML = ''
         document.body.innerHTML = BillsUI({data: billsDateCorrupt})
         
@@ -83,7 +117,7 @@ describe("Given I am connected as an employee", () => {
           document.body.innerHTML = ROUTES({ pathname })
         }
         const store = null
-        billsObject = new Bills({document, onNavigate, store, localStorage: window.localStorage})
+        const billsObject = new Bills({document, onNavigate, store, localStorage: window.localStorage})
         const handleClickNewBill = jest.fn(billsObject.handleClickNewBill)
         const newBillBtn = screen.getByTestId('btn-new-bill')
         newBillBtn.addEventListener('click', handleClickNewBill)
@@ -94,13 +128,13 @@ describe("Given I am connected as an employee", () => {
     })
 
     describe('When i click on an eye icon', () => {
-      it("Then a modal is open with the bill proof and i can see 'justificatif'", async () => {
+      it("Then a modal is open with the bill proof", async () => {
         document.body.innerHTML = BillsUI({data: bills})
         const onNavigate = (pathname) => {
           document.body.innerHTML = ROUTES({ pathname })
         }
         const store = null
-        billsObject = new Bills({document, onNavigate, store, localStorage: window.localStorage})
+        const billsObject = new Bills({document, onNavigate, store, localStorage: window.localStorage})
 
         // Mock the bootstrap function modal
         $.fn.modal = jest.fn();
@@ -116,5 +150,24 @@ describe("Given I am connected as an employee", () => {
       })
     })
   })
-
 })
+
+//Integration tests
+/*describe("Given I am a user connected as an employee", () => {
+  describe("When i'm navigate on bills page", () => {
+    it("Then Only my bills are fetched from the API and displyed on the page", async () => {
+      //jest.mock("../app/Store", () => mockStore)
+      localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.append(root)
+      router()
+      window.onNavigate(ROUTES_PATH['Bills'])
+      
+
+      screen.debug(document, 300000)
+      //const title = await screen.getByText("Mes notes de frais")
+      //expect(title).toBeTruthy()
+    })
+  })
+})*/

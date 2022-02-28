@@ -33,6 +33,14 @@ export const card = (bill) => {
     firstAndLastNames.split('.')[0] : ''
   const lastName = firstAndLastNames.includes('.') ?
   firstAndLastNames.split('.')[1] : firstAndLastNames
+  const dateFormated = () => {
+    try {
+      return formatDate(bill.date)
+    } catch (e) {
+      console.log(e, 'for', bill)
+      return bill.date
+    }
+  }
 
   return (`
     <div class='bill-card' id='open-bill${bill.id}' data-testid='open-bill${bill.id}'>
@@ -45,7 +53,7 @@ export const card = (bill) => {
         <span> ${bill.amount} € </span>
       </div>
       <div class='date-type-container'>
-        <span> ${formatDate(bill.date)} </span>
+        <span> ${dateFormated()} </span>
         <span> ${bill.type} </span>
       </div>
     </div>
