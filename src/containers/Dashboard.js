@@ -126,6 +126,7 @@ export default class {
     }
     this.updateBill(newBill)
     this.onNavigate(ROUTES_PATH['Dashboard'])
+    localStorage.setItem('location', ROUTES_PATH['Dashboard'])
   }
 
   handleRefuseSubmit = (e, bill) => {
@@ -136,6 +137,7 @@ export default class {
     }
     this.updateBill(newBill)
     this.onNavigate(ROUTES_PATH['Dashboard'])
+    localStorage.setItem('location', ROUTES_PATH['Dashboard'])
   }
 
   handleShowTickets(e, bills, index) {

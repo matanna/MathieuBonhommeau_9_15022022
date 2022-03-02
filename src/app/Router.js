@@ -15,7 +15,6 @@ import { ROUTES, ROUTES_PATH } from "../constants/routes.js"
 export default () => {
   //Get attach section in index.html
   const rootDiv = document.getElementById('root')
-  
   // Call the route in term of current pathname and load the good template
   rootDiv.innerHTML = ROUTES({ pathname: window.location.pathname })
 
@@ -31,6 +30,7 @@ export default () => {
       window.location.origin + pathname
     )
     
+    console.log(pathname)
     // For the Login route (/)
     if (pathname === ROUTES_PATH['Login']) {
       // Import the good temlplate
@@ -43,7 +43,6 @@ export default () => {
     } else if (pathname === ROUTES_PATH['Bills']) {
       // Import the good template 
       rootDiv.innerHTML = ROUTES({ pathname, loading: true })
-
       // Get icons in the left sidebar for adapt style in terms of what is displayed
       const divIcon1 = document.getElementById('layout-icon1')
       const divIcon2 = document.getElementById('layout-icon2')
@@ -52,12 +51,11 @@ export default () => {
 
       // Instantiate a bill object for manage bills operations
       const bills = new Bills({ document, onNavigate, store, localStorage  })
-      
       // Retrieve bills from the API
       bills.getBills().then(data => {
         // Inject bills in the page
         rootDiv.innerHTML = BillsUI({ data })
-
+        
         // Get icons in the left sidebar for adapt style in terms of what is displayed
         const divIcon1 = document.getElementById('layout-icon1')
         const divIcon2 = document.getElementById('layout-icon2')
@@ -121,7 +119,12 @@ export default () => {
     // If user exist in localStorage
     else if (user) {
       // Call onNavigate for go back to the last route - PREVIOUS_LOCATION is given by Login.js
-      onNavigate(PREVIOUS_LOCATION)
+      if (PREVIOUS_LOCATION) {
+        onNavigate(PREVIOUS_LOCATION)
+      } else if (localStorage.getItem('location')) {
+        onNavigate(localStorage.getItem('location'))
+      }
+      
     }
   }
 
@@ -133,9 +136,8 @@ export default () => {
     new Login({ document, localStorage, onNavigate, PREVIOUS_LOCATION, store })
     document.body.style.backgroundColor="#0E5AE5"
   
-  // If hash !== "" - thn the user is logged
+  // If hash !== "" - then the user is logged
   } else if (window.location.hash !== "") {
-
     // the user is on the Bills route
     if (window.location.hash === ROUTES_PATH['Bills']) {
       // import the good template

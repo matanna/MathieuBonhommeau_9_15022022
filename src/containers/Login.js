@@ -36,7 +36,6 @@ export default class Login {
     }
     // Save the user object in localStorage
     this.localStorage.setItem("user", JSON.stringify(user))
-
     // Logged the user
     this.login(user)
       // if login give an error (bad credentials or api connection failed), call createUser()
@@ -45,10 +44,12 @@ export default class Login {
       )
       // If is ok, redirect on bills route and save the PREVIOUS_LOCATION
       .then(() => {
-        this.onNavigate(ROUTES_PATH['Bills'])
-        this.PREVIOUS_LOCATION = ROUTES_PATH['Bills']
-        PREVIOUS_LOCATION = this.PREVIOUS_LOCATION
-        this.document.body.style.backgroundColor="#fff"
+        if (user.type === 'Employee') {
+          this.onNavigate(ROUTES_PATH['Bills'])
+          this.PREVIOUS_LOCATION = ROUTES_PATH['Bills']
+          PREVIOUS_LOCATION = this.PREVIOUS_LOCATION
+          this.document.body.style.backgroundColor="#fff"
+        }
       })
 
   }
@@ -59,7 +60,7 @@ export default class Login {
    */
   handleSubmitAdmin = e => {
     e.preventDefault()
-
+    console.log('login')
     // Create a user object with form datas which are just submit
     const user = {
       type: "Admin",
@@ -92,7 +93,7 @@ export default class Login {
       // Call login method (api call)
       .login(JSON.stringify({
         email: user.email,
-        password: user.password,
+        password: user.password
       // Retrieve jwt and save it in local storage
       })).then(({jwt}) => {
         localStorage.setItem('jwt', jwt)

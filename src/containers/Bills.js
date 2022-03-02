@@ -23,6 +23,7 @@ export default class {
   // Callback function for listener of newBill button
   handleClickNewBill = () => {
     this.onNavigate(ROUTES_PATH['NewBill'])
+    localStorage.setItem('location', ROUTES_PATH['Bills'])
   }
 
   // Callback function for listener eye-icon button - display the bill image when click

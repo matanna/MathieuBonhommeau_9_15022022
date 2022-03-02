@@ -8,7 +8,7 @@ import Actions from './Actions.js'
 const row = (bill) => {
   bill
   return (`
-    <tr>
+    <tr data-id="${bill.id}">
       <td>${bill.type}</td>
       <td>${bill.name}</td>
       <td data-testid="date">${bill.date}</td>

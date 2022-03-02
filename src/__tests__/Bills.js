@@ -16,11 +16,6 @@ import mockStore from '../__mocks__/store.js'
 
 
 describe("Given I am connected as an employee", () => {
-
-  afterEach(() => {
-    document.body.innerHTML = ''
-  })
-
   describe("When I am on Bills Page", () => {
     
     test("Then bill icon in vertical layout should be highlighted", async () => {
@@ -93,10 +88,8 @@ describe("Given I am connected as an employee", () => {
     })
 
     describe('When a bill date is corrupted', () => {
-      it("Then the bill date is displayed not formatted", () => {
-        document.body.innerHTML = ''
+      it("Then the bill date is displayed not formated", () => {
         document.body.innerHTML = BillsUI({data: billsDateCorrupt})
-        
         const date = screen.getAllByTestId("date").map(a => a.innerHTML)[0]
         expect(date).toEqual('204-04')
         const date2 = screen.getAllByTestId("date").map(a => a.innerHTML)[1]
