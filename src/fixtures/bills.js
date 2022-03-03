@@ -92,3 +92,17 @@ export const bills = [{
     "commentAdmin": "en fait non"
   },
   ]
+
+  export const newBills = [
+    {
+      "vat": "80",
+      "type": "Hôtel et logement",
+      "commentary": "séminaire billed",
+      "name": "encore",
+      "date": "20/01/22",
+      "amount": 400,
+      "email": "a@a",
+      "pct": 20
+    }
+
+  ]

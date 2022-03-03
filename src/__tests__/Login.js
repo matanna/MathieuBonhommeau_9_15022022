@@ -5,7 +5,11 @@
 import LoginUI from "../views/LoginUI";
 import Login from "../containers/Login.js";
 import { ROUTES } from "../constants/routes";
-import { fireEvent, screen } from "@testing-library/dom";
+import { fireEvent, screen, waitFor } from "@testing-library/dom";
+import usersTest from "../constants/usersTest.js"
+import mockStore from "../__mocks__/store"
+
+jest.mock("../app/Store", () => mockStore)
 
 describe("Given that I am a user on login page", () => {
   describe("When I do not fill fields and I click on employee button Login In", () => {
@@ -83,16 +87,8 @@ describe("Given that I am a user on login page", () => {
       };
 
       let PREVIOUS_LOCATION = "";
-
       const store = jest.fn();
-
-      const login = new Login({
-        document,
-        localStorage: window.localStorage,
-        onNavigate,
-        PREVIOUS_LOCATION,
-        store,
-      });
+      const login = new Login({document, localStorage: window.localStorage, onNavigate, PREVIOUS_LOCATION, store});
 
       const handleSubmit = jest.fn(login.handleSubmitEmployee);
       login.login = jest.fn().mockResolvedValue({});
@@ -168,15 +164,143 @@ describe("Given that I am a user on login page", () => {
         status: "connected",
       };
 
-      const inputEmailUser = screen.getByTestId("admin-email-input");
-      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+      const inputEmailUser = screen.getByTestId("admin-email-input")
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } })
       expect(inputEmailUser.value).toBe(inputData.email);
 
-      const inputPasswordUser = screen.getByTestId("admin-password-input");
+      const inputPasswordUser = screen.getByTestId("admin-password-input")
       fireEvent.change(inputPasswordUser, {
         target: { value: inputData.password },
+      })
+      expect(inputPasswordUser.value).toBe(inputData.password)
+
+      const form = screen.getByTestId("form-admin")
+
+      // localStorage should be populated with form data
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: jest.fn(() => null),
+          setItem: jest.fn(() => null),
+        },
+        writable: true,
+      })
+
+      // we have to mock navigation to test it
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+
+      let PREVIOUS_LOCATION = ""
+
+      const store = jest.fn()
+
+      const login = new Login({
+        document,
+        localStorage: window.localStorage,
+        onNavigate,
+        PREVIOUS_LOCATION,
+        store,
+      })
+
+      const handleSubmit = jest.fn(login.handleSubmitAdmin);
+      login.login = jest.fn().mockResolvedValue({});
+      form.addEventListener("submit", handleSubmit);
+      fireEvent.submit(form);
+      expect(handleSubmit).toHaveBeenCalled();
+      expect(window.localStorage.setItem).toHaveBeenCalled();
+      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+        "user",
+        JSON.stringify({
+          type: "Admin",
+          email: inputData.email,
+          password: inputData.password,
+          status: "connected",
+        })
+      )
+    })
+
+    test("It should renders HR dashboard page", () => {
+      expect(screen.queryByText("Validations")).toBeTruthy()
+    })
+  })
+
+  describe("When I do fill fields in correct format but with an unknown employee", () => {
+    it("Should displayed an error message and create a new employee user and loggin him", async () => {
+      document.body.innerHTML = LoginUI()
+      const inputData = {
+        type: "Employee",
+        email: usersTest[0],
+        password: "azerty",
+        status: "connected",
+      };
+      
+      const inputEmailUser = screen.getByTestId("employee-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+      expect(inputEmailUser.value).toBe(inputData.email)
+      const inputPasswordUser = screen.getByTestId("employee-password-input");
+      fireEvent.change(inputPasswordUser, { target: { value: inputData.password } });
+      expect(inputPasswordUser.value).toBe(inputData.password)
+
+      const form = screen.getByTestId("form-employee");
+
+      // localStorage should be populated with form data
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: jest.fn(() => null),
+          setItem: jest.fn(() => null),
+        },
+        writable: true,
       });
-      expect(inputPasswordUser.value).toBe(inputData.password);
+
+      // we have to mock navigation to test it
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+      let PREVIOUS_LOCATION = ""
+
+      const login = new Login({ document, localStorage: window.localStorage, onNavigate, PREVIOUS_LOCATION, mockStore })
+
+      const handleSubmit = jest.fn(login.handleSubmitEmployee)
+      login.login = jest.fn().mockRejectedValue(new Error('Cannot authenticated user'))
+      form.addEventListener("submit", handleSubmit);
+      login.createUser = jest.fn()
+      fireEvent.submit(form)
+
+      expect(login.login).toHaveBeenCalled()
+      await waitFor(() => expect(login.login).rejects.toEqual(new Error('Cannot authenticated user')))
+
+      // Test if a new user is created
+      expect(login.createUser).toHaveBeenCalled()
+
+      // Test if the justcreated user is loggin on the app
+      expect(window.localStorage.setItem).toHaveBeenCalled()
+      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+        "user",
+        JSON.stringify({
+          type: "Employee",
+          email: inputData.email,
+          password: inputData.password,
+          status: "connected",
+        })
+      )
+    })
+  })
+
+  describe("When I do fill fields in correct format but with an unknown admin", () => {
+    it("Should displayed an error message and create a new admin user and loggin him", async () => {
+      document.body.innerHTML = LoginUI()
+
+      const inputData = {
+        type: "Admin",
+        email: usersTest[1],
+        password: "azerty",
+        status: "connected",
+      };
+
+      const inputEmailUser = screen.getByTestId("admin-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+      const inputPasswordUser = screen.getByTestId("admin-password-input");
+      fireEvent.change(inputPasswordUser, { target: { value: inputData.password } });
 
       const form = screen.getByTestId("form-admin");
 
@@ -193,24 +317,28 @@ describe("Given that I am a user on login page", () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname });
       };
-
       let PREVIOUS_LOCATION = "";
-
-      const store = jest.fn();
 
       const login = new Login({
         document,
         localStorage: window.localStorage,
         onNavigate,
         PREVIOUS_LOCATION,
-        store,
+        mockStore,
       });
 
-      const handleSubmit = jest.fn(login.handleSubmitAdmin);
-      login.login = jest.fn().mockResolvedValue({});
+      const handleSubmit = jest.fn(login.handleSubmitAdmin)
+      login.login = jest.fn().mockRejectedValue(new Error('Cannot authenticated user'))
       form.addEventListener("submit", handleSubmit);
-      fireEvent.submit(form);
-      expect(handleSubmit).toHaveBeenCalled();
+      login.createUser = jest.fn()
+      fireEvent.submit(form)
+
+      expect(login.login).toHaveBeenCalled()
+      await waitFor(() => expect(login.login).rejects.toEqual(new Error('Cannot authenticated user')))
+
+      
+      expect(login.createUser).toHaveBeenCalled()
+
       expect(window.localStorage.setItem).toHaveBeenCalled();
       expect(window.localStorage.setItem).toHaveBeenCalledWith(
         "user",
@@ -221,10 +349,6 @@ describe("Given that I am a user on login page", () => {
           status: "connected",
         })
       );
-    });
-
-    test("It should renders HR dashboard page", () => {
-      expect(screen.queryByText("Validations")).toBeTruthy();
-    });
-  });
-});
+    })
+  })
+})

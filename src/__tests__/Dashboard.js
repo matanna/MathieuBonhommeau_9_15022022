@@ -256,7 +256,6 @@ describe("Given I am a user connected as Admin", () => {
       document.body.append(root)
       router()
       window.onNavigate(ROUTES_PATH.Dashboard)
-      screen.debug(document, 3000000)
       await waitFor(() => screen.getByText("Validations"))
       const contentPending  = await screen.getByText("En attente (1)")
       expect(contentPending).toBeTruthy()
