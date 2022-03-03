@@ -164,17 +164,17 @@ describe("Given that I am a user on login page", () => {
         status: "connected",
       };
 
-      const inputEmailUser = screen.getByTestId("admin-email-input");
-      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+      const inputEmailUser = screen.getByTestId("admin-email-input")
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } })
       expect(inputEmailUser.value).toBe(inputData.email);
 
-      const inputPasswordUser = screen.getByTestId("admin-password-input");
+      const inputPasswordUser = screen.getByTestId("admin-password-input")
       fireEvent.change(inputPasswordUser, {
         target: { value: inputData.password },
-      });
-      expect(inputPasswordUser.value).toBe(inputData.password);
+      })
+      expect(inputPasswordUser.value).toBe(inputData.password)
 
-      const form = screen.getByTestId("form-admin");
+      const form = screen.getByTestId("form-admin")
 
       // localStorage should be populated with form data
       Object.defineProperty(window, "localStorage", {
@@ -183,16 +183,16 @@ describe("Given that I am a user on login page", () => {
           setItem: jest.fn(() => null),
         },
         writable: true,
-      });
+      })
 
       // we have to mock navigation to test it
       const onNavigate = (pathname) => {
-        document.body.innerHTML = ROUTES({ pathname });
-      };
+        document.body.innerHTML = ROUTES({ pathname })
+      }
 
-      let PREVIOUS_LOCATION = "";
+      let PREVIOUS_LOCATION = ""
 
-      const store = jest.fn();
+      const store = jest.fn()
 
       const login = new Login({
         document,
@@ -200,7 +200,7 @@ describe("Given that I am a user on login page", () => {
         onNavigate,
         PREVIOUS_LOCATION,
         store,
-      });
+      })
 
       const handleSubmit = jest.fn(login.handleSubmitAdmin);
       login.login = jest.fn().mockResolvedValue({});
@@ -216,13 +216,13 @@ describe("Given that I am a user on login page", () => {
           password: inputData.password,
           status: "connected",
         })
-      );
-    });
+      )
+    })
 
     test("It should renders HR dashboard page", () => {
-      expect(screen.queryByText("Validations")).toBeTruthy();
-    });
-  });
+      expect(screen.queryByText("Validations")).toBeTruthy()
+    })
+  })
 
   describe("When I do fill fields in correct format but with an unknown employee", () => {
     it("Should displayed an error message and create a new employee user and loggin him", async () => {
@@ -233,11 +233,13 @@ describe("Given that I am a user on login page", () => {
         password: "azerty",
         status: "connected",
       };
-
+      
       const inputEmailUser = screen.getByTestId("employee-email-input");
       fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+      expect(inputEmailUser.value).toBe(inputData.email)
       const inputPasswordUser = screen.getByTestId("employee-password-input");
       fireEvent.change(inputPasswordUser, { target: { value: inputData.password } });
+      expect(inputPasswordUser.value).toBe(inputData.password)
 
       const form = screen.getByTestId("form-employee");
 
@@ -254,32 +256,24 @@ describe("Given that I am a user on login page", () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname });
       };
-      let PREVIOUS_LOCATION = "";
+      let PREVIOUS_LOCATION = ""
 
-      const login = new Login({
-        document,
-        localStorage: window.localStorage,
-        onNavigate,
-        PREVIOUS_LOCATION,
-        mockStore,
-      });
+      const login = new Login({ document, localStorage: window.localStorage, onNavigate, PREVIOUS_LOCATION, mockStore })
 
       const handleSubmit = jest.fn(login.handleSubmitEmployee)
       login.login = jest.fn().mockRejectedValue(new Error('Cannot authenticated user'))
       form.addEventListener("submit", handleSubmit);
       login.createUser = jest.fn()
-      
-      try {
-        await waitFor(() => fireEvent.submit(form));
-      } catch (e) {
-        // Test the error siplayed in console
-        expect(e).toMatch('Cannot authenticated user')
-      }
+      fireEvent.submit(form)
+
+      expect(login.login).toHaveBeenCalled()
+      await waitFor(() => expect(login.login).rejects.toEqual(new Error('Cannot authenticated user')))
+
       // Test if a new user is created
       expect(login.createUser).toHaveBeenCalled()
 
       // Test if the justcreated user is loggin on the app
-      expect(window.localStorage.setItem).toHaveBeenCalled();
+      expect(window.localStorage.setItem).toHaveBeenCalled()
       expect(window.localStorage.setItem).toHaveBeenCalledWith(
         "user",
         JSON.stringify({
@@ -288,8 +282,7 @@ describe("Given that I am a user on login page", () => {
           password: inputData.password,
           status: "connected",
         })
-      );
-
+      )
     })
   })
 
@@ -338,12 +331,12 @@ describe("Given that I am a user on login page", () => {
       login.login = jest.fn().mockRejectedValue(new Error('Cannot authenticated user'))
       form.addEventListener("submit", handleSubmit);
       login.createUser = jest.fn()
+      fireEvent.submit(form)
+
+      expect(login.login).toHaveBeenCalled()
+      await waitFor(() => expect(login.login).rejects.toEqual(new Error('Cannot authenticated user')))
+
       
-      try {
-        await waitFor(() => fireEvent.submit(form));
-      } catch (e) {
-        expect(e).toMatch('Cannot authenticated user')
-      }
       expect(login.createUser).toHaveBeenCalled()
 
       expect(window.localStorage.setItem).toHaveBeenCalled();
@@ -358,4 +351,4 @@ describe("Given that I am a user on login page", () => {
       );
     })
   })
-});
+})

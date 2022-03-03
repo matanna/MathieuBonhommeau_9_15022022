@@ -2,20 +2,22 @@
  * @jest-environment jsdom
  */
 import {fireEvent, getByTestId, getByText, screen, waitFor} from "@testing-library/dom"
-import '@testing-library/jest-dom/extend-expect'
+import '@testing-library/jest-dom'
 import userEvent from '@testing-library/user-event'
-import BillsUI, {rows} from "../views/BillsUI.js"
-import { bills, billsDateCorrupt } from "../fixtures/bills.js"
-import { ROUTES, ROUTES_PATH} from "../constants/routes.js";
-import {localStorageMock} from "../__mocks__/localStorage.js";
-import router from "../app/Router.js";
+import BillsUI from "../views/BillsUI.js"
+import { ROUTES, ROUTES_PATH} from "../constants/routes.js"
+import {localStorageMock} from "../__mocks__/localStorage.js"
 import Bills from "../containers/Bills.js"
 import { formatStatus } from '../app/format.js'
 import mockStore from '../__mocks__/store.js'
+import { bills, billsDateCorrupt } from "../fixtures/bills.js"
+import router from "../app/Router.js"
 
 
+jest.mock("../app/Store", () => mockStore)
 
 describe("Given I am connected as an employee", () => {
+
   describe("When I am on Bills Page", () => {
     
     test("Then bill icon in vertical layout should be highlighted", async () => {
@@ -145,11 +147,21 @@ describe("Given I am connected as an employee", () => {
   })
 })
 
-//Integration tests
-/*describe("Given I am a user connected as an employee", () => {
+//Integration tests GET
+describe("Given I am a user connected as an employee", () => {
   describe("When i'm navigate on bills page", () => {
-    it("Then Only my bills are fetched from the API and displyed on the page", async () => {
-      //jest.mock("../app/Store", () => mockStore)
+
+    beforeEach(() => {
+      document.body.innerHTML = ''
+    })
+
+    afterEach(() => {
+      jest.clearAllMocks()
+    })
+
+    it("Then bills are fetched from the API and displayed on the page", async () => {
+      const listMock = jest.spyOn(mockStore.bills(), 'list')
+
       localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
       const root = document.createElement("div")
       root.setAttribute("id", "root")
@@ -157,10 +169,58 @@ describe("Given I am connected as an employee", () => {
       router()
       window.onNavigate(ROUTES_PATH['Bills'])
       
+      expect(listMock).toHaveBeenCalled()
+      expect(listMock()).resolves.toStrictEqual(bills)
 
-      screen.debug(document, 300000)
-      //const title = await screen.getByText("Mes notes de frais")
-      //expect(title).toBeTruthy()
+      await waitFor(() => expect(screen.getByText("Mes notes de frais")).toBeTruthy())
+      await waitFor(() => expect(screen.getByTestId('tbody').length).toEqual(listMock().length))
+      await waitFor(() => expect(document.querySelector('tr[data-id="47qAXb6fIm2zOKkLzMro"]').dataset.id).toBe(bills[0].id))
+     
     })
+
+    describe("When a 404 error is send by the API", () => {
+      it("Then an error message is displayed on the page", async () => {
+        expect.assertions(3);
+        const listMock = jest.spyOn(mockStore.bills(), 'list').mockImplementation(() => {
+          return Promise.reject(new Error("Erreur 404"))
+        })
+
+        localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+        const root = document.createElement("div")
+        root.setAttribute("id", "root")
+        document.body.append(root)
+        router()
+        window.onNavigate(ROUTES_PATH['Bills'])
+
+        expect(listMock).toHaveBeenCalled()
+        expect(listMock()).rejects.toEqual(new Error("Erreur 404"))
+
+        await waitFor(() => expect(screen.getByText(/Erreur 404/)).toBeTruthy())
+
+      })
+    })
+
+    describe("When a 500 error is send by the API", () => {
+      it("Then an error message is displayed on the page", async () => {
+        expect.assertions(3);
+        const listMock = jest.spyOn(mockStore.bills(), 'list').mockImplementation(() => {
+          return Promise.reject(new Error("Erreur 500"))
+        })
+
+        localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+        const root = document.createElement("div")
+        root.setAttribute("id", "root")
+        document.body.append(root)
+        router()
+        window.onNavigate(ROUTES_PATH['Bills'])
+
+        expect(listMock).toHaveBeenCalled()
+        expect(listMock()).rejects.toEqual(new Error("Erreur 500"))
+
+        await waitFor(() => expect(screen.getByText(/Erreur 500/)).toBeTruthy())
+
+      })
+    })
+
   })
-})*/
+})

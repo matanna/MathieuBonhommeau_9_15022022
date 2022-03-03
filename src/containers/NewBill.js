@@ -83,7 +83,10 @@ export default class NewBill {
         }
         this.updateBill(bill)
         this.onNavigate(ROUTES_PATH['Bills'])
-      }).catch(error => console.error(error))
+      }).catch(error => {
+        this.onNavigate(ROUTES_PATH['NewBill'])
+        console.error(error) 
+      })
   }
 
   // not need to cover this function by tests
@@ -95,7 +98,10 @@ export default class NewBill {
       .then(() => {
         this.onNavigate(ROUTES_PATH['Bills'])
       })
-      .catch(error => console.error(error))
+      .catch(error => {
+        this.onNavigate(ROUTES_PATH['NewBill'])
+        console.error(error)
+      })
     }
   }
 }

@@ -29,8 +29,6 @@ export default () => {
       pathname,
       window.location.origin + pathname
     )
-    
-    console.log(pathname)
     // For the Login route (/)
     if (pathname === ROUTES_PATH['Login']) {
       // Import the good temlplate
