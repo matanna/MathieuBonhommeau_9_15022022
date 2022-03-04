@@ -1,4 +1,4 @@
-import { ROUTES_PATH } from '../constants/routes.js'
+import { ROUTES_PATH } from "../constants/routes.js"
 
 export default class Logout {
   constructor({ document, onNavigate, localStorage }) {
@@ -6,11 +6,11 @@ export default class Logout {
     this.onNavigate = onNavigate
     this.localStorage = localStorage
     // Get the button for disconnect
-    $('#layout-disconnect').click(this.handleClick)
+    $("#layout-disconnect").click(this.handleClick)
   }
   // callback function for the diconnect button
   handleClick = (e) => {
     this.localStorage.clear()
-    this.onNavigate(ROUTES_PATH['Login'])
+    this.onNavigate(ROUTES_PATH["Login"])
   }
-} 
+}
