@@ -32,7 +32,7 @@ export default class NewBill {
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
     const extensionsAut = ["image/png", "image/jpeg"]
 
-    if (extensionsAut.includes(file.type)) {
+    if (file && extensionsAut.includes(file.type)) {
       // Split the path (C:\ggggg\hhhhh.jpg) with split(\)
       const filePath = e.target.value.split(/\\/g)
       // Retrieve the last item of filePath[] which contains the file name
