@@ -5,25 +5,24 @@ import DashboardUI from "../views/DashboardUI.js"
 
 // Define pathname avaible in the app with their associted method
 export const ROUTES_PATH = {
-  Login: '/',
-  Bills: '#employee/bills',
-  NewBill : '#employee/bill/new',
-  Dashboard: '#admin/dashboard'
+  Login: "/",
+  Bills: "#employee/bills",
+  NewBill: "#employee/bill/new",
+  Dashboard: "#admin/dashboard",
 }
 
 // Define the view to use in term of pathname
 export const ROUTES = ({ pathname, data, error, loading }) => {
   switch (pathname) {
-    case ROUTES_PATH['Login']:
+    case ROUTES_PATH["Login"]:
       return LoginUI({ data, error, loading })
-    case ROUTES_PATH['Bills']:
+    case ROUTES_PATH["Bills"]:
       return BillsUI({ data, error, loading })
-    case ROUTES_PATH['NewBill']:
+    case ROUTES_PATH["NewBill"]:
       return NewBillUI()
-    case ROUTES_PATH['Dashboard']:
+    case ROUTES_PATH["Dashboard"]:
       return DashboardUI({ data, error, loading })
     default:
       return LoginUI({ data, error, loading })
   }
 }
-
