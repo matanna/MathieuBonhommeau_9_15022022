@@ -62,6 +62,92 @@ describe("Given I am connected as an employee", () => {
       expect(screen.getByRole("button").textContent).toBe("Envoyer")
     })
 
+    describe("When i fill all form fields with expected datas", () => {
+      it("Then fields values matched than what i have entered", () => {
+        document.body.innerHTML = NewBillUI()
+
+        // Fill and test if the value of each fields is OK
+        const type = screen.getByTestId("expense-type")
+        fireEvent.change(type, {target: {value: "Transports"}})
+        expect(type.value).toBe(("Transports"))
+        const name = screen.getByTestId("expense-name")
+        fireEvent.change(name, {target: {value: "test"}})
+        expect(name.value).toBe(("test"))
+        const date = screen.getByTestId("datepicker")
+        fireEvent.change(date, {target: {value: '2022-03-02'}})
+        expect(date.value).toBe(('2022-03-02'))
+        const amount = screen.getByTestId("amount")
+        fireEvent.change(amount, {target: {value: "500"}})
+        expect(amount.value).toBe(("500"))
+        const vat = screen.getByTestId("vat")
+        fireEvent.change(vat, {target: {value: "20"}})
+        expect(vat.value).toBe(('20'))
+        const pct = screen.getByTestId("pct")
+        fireEvent.change(pct, {target: {value: "20"}})
+        expect(pct.value).toBe(("20"))
+        const commentary = screen.getByTestId("commentary")
+        fireEvent.change(commentary, {target: {value: "Un commentaire de test"}})
+        expect(commentary.value).toBe(("Un commentaire de test"))
+        const file = screen.getByTestId("file")
+        const fileGoodData = {
+          name: "fichier-test.jpg",
+          type: "image/jpeg"
+        }
+        const fileTest = new File ([""], fileGoodData.name, { type: fileGoodData.type })
+        fireEvent.change(file, {target: {files: [fileTest]} })
+        expect(file.files[0].name).toBe(("fichier-test.jpg"))
+        expect(file.files[0].type).toBe(("image/jpeg"))
+      })
+    })
+
+    describe("When i submit the form without fill all fields", () => {
+      it("Then the newBill page is already render, i'm not redirect", async () => {
+        Object.defineProperty(window, 'localStorage', { value: localStorageMock })
+        window.localStorage.setItem('user', JSON.stringify({type: 'Employee', email: 'a@a'}))
+        const root = document.createElement("div")
+        root.setAttribute("id", "root")
+        document.body.append(root)
+        router()
+        window.onNavigate(ROUTES_PATH.NewBill)
+
+        // The store is mocked by mockStore for replace calls API
+        const newBill = new NewBill({document, onNavigate, store: mockStore, window: window.localStorage})
+
+        // No fill fields
+        const type = screen.getByTestId("expense-type")
+        expect(type.value).toBe(("Transports"))
+        const name = screen.getByTestId("expense-name")
+        fireEvent.change(name, {target: {value: ""}})
+        expect(name.value).toBe((""))
+        const date = screen.getByTestId("datepicker")
+        fireEvent.change(date, {target: {value: ''}})
+        expect(date.value).toBe((''))
+        const amount = screen.getByTestId("amount")
+        fireEvent.change(amount, {target: {value: ""}})
+        expect(amount.value).toBe((""))
+        const vat = screen.getByTestId("vat")
+        fireEvent.change(vat, {target: {value: ""}})
+        expect(vat.value).toBe((''))
+        const pct = screen.getByTestId("pct")
+        fireEvent.change(pct, {target: {value: ""}})
+        expect(pct.value).toBe((""))
+        const commentary = screen.getByTestId("commentary")
+        fireEvent.change(commentary, {target: {value: ""}})
+        expect(commentary.value).toBe((""))
+        const file = screen.getByTestId("file")
+        fireEvent.change(file, {target: {files: ""} })
+        expect(file.value).toBe((""))
+
+        const handleSubmit = jest.fn(newBill.handleSubmit)
+        const formNewBill = screen.getByTestId('form-new-bill')
+        formNewBill.addEventListener('submit', handleSubmit)
+        fireEvent.submit(formNewBill)
+
+        await waitFor(() => expect(screen.getByText('Envoyer une note de frais')).toBeTruthy())
+
+      })
+    })
+
     describe("When i choose a file with a good extention in the input file", () => { 
       it("Then the is saved in the browser and any error is throw", () => {
         document.body.innerHTML = NewBillUI()
@@ -121,44 +207,6 @@ describe("Given I am connected as an employee", () => {
 
         expect(handleChangeFile).toHaveBeenCalled()
         expect(console.error).toHaveBeenCalled()
-      })
-    })
-
-    describe("When i fill all form fields with expected datas", () => {
-      it("Then fields values matched than what i have entered", () => {
-        document.body.innerHTML = NewBillUI()
-
-        // Fill and test if the value of each fields is OK
-        const type = screen.getByTestId("expense-type")
-        fireEvent.change(type, {target: {value: "Transports"}})
-        expect(type.value).toBe(("Transports"))
-        const name = screen.getByTestId("expense-name")
-        fireEvent.change(name, {target: {value: "test"}})
-        expect(name.value).toBe(("test"))
-        const date = screen.getByTestId("datepicker")
-        fireEvent.change(date, {target: {value: '2022-03-02'}})
-        expect(date.value).toBe(('2022-03-02'))
-        const amount = screen.getByTestId("amount")
-        fireEvent.change(amount, {target: {value: "500"}})
-        expect(amount.value).toBe(("500"))
-        const vat = screen.getByTestId("vat")
-        fireEvent.change(vat, {target: {value: "20"}})
-        expect(vat.value).toBe(('20'))
-        const pct = screen.getByTestId("pct")
-        fireEvent.change(pct, {target: {value: "20"}})
-        expect(pct.value).toBe(("20"))
-        const commentary = screen.getByTestId("commentary")
-        fireEvent.change(commentary, {target: {value: "Un commentaire de test"}})
-        expect(commentary.value).toBe(("Un commentaire de test"))
-        const file = screen.getByTestId("file")
-        const fileGoodData = {
-          name: "fichier-test.jpg",
-          type: "image/jpeg"
-        }
-        const fileTest = new File ([""], fileGoodData.name, { type: fileGoodData.type })
-        fireEvent.change(file, {target: {files: [fileTest]} })
-        expect(file.files[0].name).toBe(("fichier-test.jpg"))
-        expect(file.files[0].type).toBe(("image/jpeg"))
       })
     })
   })
